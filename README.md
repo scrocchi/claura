@@ -54,12 +54,13 @@ That's it — no `settings.json` edits. The plugin owns its own state under
 - macOS (uses `afplay`, `stat -f`, BSD `ps`).
 - `jq` on `PATH` (`brew install jq`).
 
-## No bundled sound
+## Sound
 
-0.1.0 ships with **no audio file** (the prototype's `birds.mp3` could not be
-license-cleared in time for the release — see [`docs/SOURCES.md`](docs/SOURCES.md)).
+Claura ships with a bundled `birds` soundscape, used by default — no setup
+needed.
 
-Drop your own `.mp3` (loopable, ~60–300s works best) into:
+To use your own audio instead, drop an `.mp3` (loopable, ~60–300s works best)
+into:
 
 ```
 ${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data/claura}/sounds/<name>.mp3
@@ -93,14 +94,6 @@ The slash command is the supported interface:
 
 You can also run the script directly:
 `${CLAUDE_PLUGIN_ROOT}/bin/claura-cli.sh status`.
-
-## Migrating from the standalone prototype
-
-If you wired the original `~/.claude/audio/claude-audio.sh` watcher into
-your global `~/.claude/settings.json`, Claura detects it on first launch
-and stays **inert** (no sound, no state mutation) until you clean it up
-by hand. `/claura:menu status` will show `legacy_detected: true` while it
-waits. See [`docs/MIGRATION.md`](docs/MIGRATION.md) for the steps.
 
 ## Uninstall
 
