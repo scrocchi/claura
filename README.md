@@ -105,13 +105,20 @@ state/lock.d/            # mkdir lock for the controller
 ## Releasing
 
 ```sh
-# bump version in both manifests, then:
-git tag v0.1.0
-git push --tags
+# 1. Bump `version` in both manifests by hand:
+#       .claude-plugin/plugin.json
+#       .claude-plugin/marketplace.json
+# 2. Commit.
+# 3. Create the canonical tag (validates manifest agreement):
+claude plugin tag .
+# 4. Push it:
+git push origin refs/tags/claura--v$(jq -r .version .claude-plugin/plugin.json)
 ```
 
-(There is intentionally no helper script in 0.1.0 — bump both
-`.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` by hand.)
+`claude plugin tag` writes a tag of the form `<plugin>--v<version>` (e.g.
+`claura--v0.1.0`) after checking that `plugin.json` and the marketplace
+entry agree on the version. There is intentionally no helper script in
+0.1.0 — bump both manifests by hand.
 
 ## License
 
