@@ -1,0 +1,20 @@
+{
+  "name": "claura-marketplace",
+  "owner": {
+    "name": "scrocchi"
+  },
+  "plugins": [
+    {
+      "name": "claura",
+      "source": ".",
+      "version": "0.1.0",
+      "description": "Ambient audio for Claude Code (macOS).",
+      "category": "productivity",
+      "tags": [
+        "audio",
+        "ambient",
+        "focus"
+      ]
+    }
+  ]
+}

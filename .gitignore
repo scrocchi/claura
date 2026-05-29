@@ -1,0 +1,9 @@
+.DS_Store
+*.swp
+*.swo
+
+# Local runtime artifacts if someone runs the scripts from a checkout.
+state/
+*.bootstrapped
+*.legacy-detected
+*.legacy-cleared

@@ -1,0 +1,37 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: macos-latest    # 0.1.0 is macOS-only
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Claude Code CLI
+        run: npm i -g @anthropic-ai/claude-code
+
+      - name: Install shellcheck
+        run: brew install shellcheck
+
+      - name: claude plugin validate --strict
+        run: claude plugin validate --strict .
+
+      - name: bash -n on every script
+        run: bash -n bin/*.sh
+
+      - name: shellcheck (blocking)
+        run: shellcheck -s bash bin/*.sh
+
+      - name: Smoke — CLAUDE_PLUGIN_ROOT with a space
+        run: |
+          mkdir -p "/tmp/has space/claura"
+          cp -R . "/tmp/has space/claura/"
+          CLAUDE_PLUGIN_ROOT="/tmp/has space/claura" \
+            bash -n "/tmp/has space/claura/bin/claura-control.sh"
+          CLAUDE_PLUGIN_ROOT="/tmp/has space/claura" \
+            bash -n "/tmp/has space/claura/bin/claura-player.sh"
+          CLAUDE_PLUGIN_ROOT="/tmp/has space/claura" \
+            bash -n "/tmp/has space/claura/bin/claura-cli.sh"

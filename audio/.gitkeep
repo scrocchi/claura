@@ -1,0 +1,2 @@
+# Bundled audio lives here. See ../docs/SOURCES.md for the release gate.
+# Nothing ships in 0.1.0; users drop their own .mp3 into ${CLAUDE_PLUGIN_DATA}/sounds/.
