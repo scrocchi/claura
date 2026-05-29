@@ -112,10 +112,10 @@ status_cmd() {
     --arg data "$data_dir" \
     --arg root "$root" \
     '{ok:true,
-      enabled:    (.enabled    // true),
+      enabled:    (if has("enabled") then .enabled else true  end),
       sound:      (.sound      // "birds"),
       volume:     (.volume     // 100),
-      muted:      (.muted      // false),
+      muted:      (if has("muted")   then .muted   else false end),
       threshold:  (.threshold  // 5),
       hysteresis: (.hysteresis // 10),
       max_stale:  (.max_stale  // 75),

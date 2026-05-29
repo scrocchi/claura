@@ -105,8 +105,8 @@ claura_stop_player() {
   if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
     kill "$pid" 2>/dev/null || true
     # Best-effort: wait briefly so the next reconcile sees a clean slate.
-    local i
-    for i in 1 2 3 4 5; do
+    local _
+    for _ in 1 2 3 4 5; do
       kill -0 "$pid" 2>/dev/null || break
       sleep 0.1
     done

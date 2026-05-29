@@ -1,12 +1,13 @@
 {
   "name": "claura-marketplace",
+  "description": "Single-plugin marketplace for Claura, the macOS ambient-audio plugin for Claude Code.",
   "owner": {
     "name": "scrocchi"
   },
   "plugins": [
     {
       "name": "claura",
-      "source": ".",
+      "source": "./",
       "version": "0.1.0",
       "description": "Ambient audio for Claude Code (macOS).",
       "category": "productivity",
