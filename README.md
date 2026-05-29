@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" alt="Claura" width="100%">
+</p>
+
 # Claura
 
 [![validate](https://github.com/scrocchi/claura/actions/workflows/validate.yml/badge.svg)](https://github.com/scrocchi/claura/actions/workflows/validate.yml)
