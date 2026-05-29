@@ -1,5 +1,7 @@
 # Claura
 
+[![validate](https://github.com/scrocchi/claura/actions/workflows/validate.yml/badge.svg)](https://github.com/scrocchi/claura/actions/workflows/validate.yml)
+
 Ambient audio for [Claude Code](https://claude.com/claude-code). Plays a
 soundscape while Claude is working and stops the instant it goes idle —
 even when you press Escape mid-generation.
@@ -8,17 +10,35 @@ even when you press Escape mid-generation.
 
 ## How it works
 
-Hooks (`UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`,
-`PermissionRequest`, `SessionEnd`, …) drive a small controller that
-registers/unregisters each session. A background player runs as long as at
-least one session is "working". Aliveness is refreshed by both hook events
-and a CPU sampler watching the Claude process tree, so the audio survives
-long model thinking (no hooks fire) but cuts within ~10s of Escape or idle.
+Hooks (`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`,
+`Stop`, `PermissionRequest`, `StopFailure`, `Notification`, `SessionEnd`)
+drive a small controller that registers/unregisters each session. A
+background player runs as long as at least one session is "working".
+Aliveness is refreshed by both hook events and a CPU sampler watching the
+Claude process tree, so the audio survives long model thinking (hooks
+don't fire then) but cuts within ~10s of Escape or idle.
+
+Two short system chimes are also wired in:
+
+- `Glass.aiff` on `Stop` — turn finished cleanly.
+- `Pop.aiff` on `PermissionRequest` — Claude is waiting for approval.
 
 ## Install
 
+From GitHub (recommended):
+
 ```sh
-claude plugin marketplace add /abs/path/to/this/repo
+claude plugin marketplace add scrocchi/claura
+claude plugin install claura@claura-marketplace
+```
+
+(Equivalent: `claude plugin marketplace add https://github.com/scrocchi/claura`.)
+
+From a local checkout (for development):
+
+```sh
+git clone https://github.com/scrocchi/claura
+claude plugin marketplace add ./claura
 claude plugin install claura@claura-marketplace
 ```
 
@@ -32,8 +52,10 @@ That's it — no `settings.json` edits. The plugin owns its own state under
 
 ## No bundled sound
 
-0.1.0 ships with **no audio file**. Drop your own `.mp3` (loopable, ~60-300s
-works best) into:
+0.1.0 ships with **no audio file** (the prototype's `birds.mp3` could not be
+license-cleared in time for the release — see [`docs/SOURCES.md`](docs/SOURCES.md)).
+
+Drop your own `.mp3` (loopable, ~60–300s works best) into:
 
 ```
 ${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data/claura}/sounds/<name>.mp3
@@ -45,29 +67,36 @@ Then point Claura at it:
 /claura:menu set sound <name>
 ```
 
-(Without the `.mp3` extension.) `/claura:menu` lists the sounds it can find.
+(Without the `.mp3` extension.) `/claura:menu status` lists every sound it
+can find under `available_sounds`.
 
 ## Configure
 
 The slash command is the supported interface:
 
 ```
-/claura:menu                     # status: enabled, sound, volume, muted, legacy state
+/claura:menu                     # full status JSON
 /claura:menu on                  # enable + unmute
 /claura:menu off                 # disable + stop player
 /claura:menu mute                # mute + stop player
 /claura:menu set volume 60       # 0..100; restarts player so it applies right away
-/claura:menu set sound rain      # restarts player
+/claura:menu set sound <name>    # name must resolve to a .mp3; restarts player
 ```
 
-Everything outputs a single line of JSON; you can run the script directly
-too: `${CLAUDE_PLUGIN_ROOT}/bin/claura-cli.sh status`.
+`status` returns one line of JSON with: `enabled`, `sound`, `volume`,
+`muted`, `threshold`, `hysteresis`, `max_stale`, `available_sounds`,
+`legacy_detected`, `data_dir`, `plugin_root`.
+
+You can also run the script directly:
+`${CLAUDE_PLUGIN_ROOT}/bin/claura-cli.sh status`.
 
 ## Migrating from the standalone prototype
 
-If you wired the original `~/.claude/audio/claude-audio.sh` watcher into your
-global `~/.claude/settings.json`, Claura detects it on first launch and stays
-**inert** until you clean up by hand. See [`docs/MIGRATION.md`](docs/MIGRATION.md).
+If you wired the original `~/.claude/audio/claude-audio.sh` watcher into
+your global `~/.claude/settings.json`, Claura detects it on first launch
+and stays **inert** (no sound, no state mutation) until you clean it up
+by hand. `/claura:menu status` will show `legacy_detected: true` while it
+waits. See [`docs/MIGRATION.md`](docs/MIGRATION.md) for the steps.
 
 ## Uninstall
 
@@ -75,10 +104,10 @@ global `~/.claude/settings.json`, Claura detects it on first launch and stays
 claude plugin uninstall claura
 ```
 
-Removes the plugin and the active player. Your sound files under
+Removes the plugin and stops the active player. Your sounds under
 `${CLAUDE_PLUGIN_DATA}/sounds/` and your `config.json` stay.
 
-To reset settings:
+To reset settings without uninstalling:
 
 ```sh
 rm "${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data/claura}/config.json"
@@ -112,7 +141,7 @@ state/lock.d/            # mkdir lock for the controller
 # 3. Create the canonical tag (validates manifest agreement):
 claude plugin tag .
 # 4. Push it:
-git push origin refs/tags/claura--v$(jq -r .version .claude-plugin/plugin.json)
+git push origin "refs/tags/claura--v$(jq -r .version .claude-plugin/plugin.json)"
 ```
 
 `claude plugin tag` writes a tag of the form `<plugin>--v<version>` (e.g.
